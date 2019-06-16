@@ -8,7 +8,7 @@ import plotly.graph_objs as go
 
 
 
-py.sign_in('atmismahir', 'c7PTM5rZ8tl10cOxvhS9')
+py.sign_in('atmismahir', '****')
   
 # Open the CSV  
 df = pd.read_csv('../results/tc_benchmark.csv')

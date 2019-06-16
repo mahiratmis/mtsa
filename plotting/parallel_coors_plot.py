@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.graph_objs as go
 import numpy as np
 
-py.sign_in('atmismahir', 'c7PTM5rZ8tl10cOxvhS9')
+py.sign_in('atmismahir', '****')
 
 # Open the CSV
 df = pd.read_csv('/home/atmis/Documents/Projects/Python/discreteSWarm_stats/results/all_results_with_meta.csv')

@@ -6,7 +6,7 @@ import plotly.plotly as py
 import pandas as pd
 from plotly.graph_objs import *
 
-py.sign_in('atmismahir', 'c7PTM5rZ8tl10cOxvhS9')
+py.sign_in('atmismahir', '****')
 
 # Open the CSV  
 df = pd.read_csv('./mssainner_json.csv')
