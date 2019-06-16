@@ -865,27 +865,6 @@ def ns_shuffle(S):
     random.shuffle(S_new)
     return S_new
 
-
-def ns_mutate_non_uniform(minCluster, maxCluster, S):
-
-    global iter
-    global iter_max
-
-    def delta_n_y(y, b=5.0):
-        p = random.uniform(0, 1)
-        return int(math.ceil(y * (1.0 - p ** ((1.0 - iter / iter_max) ** b))))
-
-    S_new = S[:]
-    numSKUs = len(S_new)
-    idx1, idx2 = random.sample(range(0, numSKUs), 2)
-    if random.uniform(0, 1) > 0.5:
-        S_new[idx1] += delta_n_y(maxCluster - S[idx1])
-    else:
-        S_new[idx1] -= delta_n_y(S[idx1] - minCluster)
-    # print(S_new[idx1], "----", S_new)
-    return S_new
-
-
 def ns_mutate_random(minCluster, maxCluster, S, n=1):
     S_new = S[:]
     numSKUs = len(S_new)
@@ -899,7 +878,6 @@ def ns_mutate_random(minCluster, maxCluster, S, n=1):
         S_new[idx2] = random.choice(numbers)
     return S_new
 
-
 def mixed(minCluster, maxCluster, S):
     r = random.uniform(0, 1)
     if r <= 0.25:
@@ -911,7 +889,6 @@ def mixed(minCluster, maxCluster, S):
     return ns_mutate_random(minCluster, maxCluster, S, 2)
 
 def neighborhood_solution(S, minCluster, maxCluster, method=5):
-
     if method ==5:
         return mixed(minCluster, maxCluster, S)
     if method ==1:
@@ -940,7 +917,7 @@ def check_neighbor_solutions(S, T, TC_S_best, I_sa_inner, obj_func, process_id, 
     s_best_ = S
     Nt_inner=0
     while Nt_inner <= I_sa_inner:
-        s_prime = ns_mutate_non_uniform(minCluster, maxCluster, S)
+        s_prime = neighborhood_solution(S, minCluster, maxCluster)
         # evaluate the costs
         tc_s = obj_func(S)[0]
         tc_sprime = obj_func(s_prime)[0]
@@ -953,14 +930,13 @@ def check_neighbor_solutions(S, T, TC_S_best, I_sa_inner, obj_func, process_id, 
                 tc_s_best_ = tc_s
                 s_best_ = S
                 Nt_inner = 0
-            else:
-                Nt_inner += 1
         else:
             r = random.uniform(0, 1)
             if r < math.exp(-delta_e / T):
                 # allow  bad solution
                 S = s_prime
                 tc_s = tc_sprime
+        Nt_inner += 1
 
     # print("Nonsuccessfull Thread")
     if TC_S_best > tc_s_best_:
@@ -1105,15 +1081,11 @@ def GAPoolingHeuristic(case_id, failure_rates, service_rates, holding_costs, pen
         # TRICK
         # set all other solutions to the best solution
         S_list = [S_best] * Psize
-        global iter_max
-        iter_max = I_sa_main
-        print  iter_max
+
         # print("Initial Best Cost:{0} Best Individual{1}".format(TC_S_best,S_best))
         (a, f) = (3, 0.25) #nonlinear cooling parameters
         # start_time = time.time()  # remember when we started
         while NT_main <= I_sa_main and T >= Tf:
-            global iter
-            iter = NT_main
             # traverse each individual
             # traverse each individual
             # start the search operations and mark each future with individuals array index
@@ -1202,30 +1174,27 @@ def GAPoolingHeuristic(case_id, failure_rates, service_rates, holding_costs, pen
 
 
 # file = "C:/Users/Fuat/Dropbox/Pooling_GA/fullRangeResultsFullFlexNew.json"
-file = "/home/atmis/Documents/Projects/Python/kmedian_final_version/fullRangeResultsFullFlexNew.json"
+file = "/home/atmis/Projects/Python/kmedian_final_version/fullRangeResultsFullFlexNew.json"
 json_case = [json.loads(line) for line in open(file, "r")]
 sorted_assignments = sorted(json_case, key=operator.itemgetter('caseID'))
-json_cases = sorted_assignments[:32]
+json_cases = sorted_assignments[:]
 for case in json_cases:
     print (case["caseID"])
-
 
 # RUN of ALgorithm STARTS HERE ##
 # json_case
 results = []
 GAPoolingResult = {}
 case_idx = 0
-iter=0
-iter_max=0
 
 # get best n individuals found by kmedian algorithm
 num_cases = len(json_case)-1
-n_best_individuals = get_n_best_individuals(num_cases, n=5)
+n_best_individuals = get_n_best_individuals(num_cases+1, n=5)
 
 
 for case in json_cases:
-    # if case["caseID"] not in ["Case: 0126", "Case: 0127", "Case: 0128"]:
-    #     continue
+    if case["caseID"] not in ["Case: 0128"]:
+         continue
     if case["caseID"] != "Case: 000x":
         failure_rates = case["failure_rates"]
         service_rates = case["service_rates"]
@@ -1270,7 +1239,7 @@ for case in json_cases:
     GAPoolingResult["simulationGAresults"] = case
     results.append(GAPoolingResult)
     case_idx += 1
-    with open('results_p1.csv', 'a') as csvfile:
+    with open('results_p4.csv', 'a') as csvfile:
         fieldnames = ['case_id', 'running_time', 'total_cost', 'holding_cost',
                       'penalty_cost', 'machine_cost', 'skill_cost', 'best_cluster',
                       'bestS', 'bestEBO', 'bestServerAssignment', 'GAP', 'GAPoolingPercentGAP']
@@ -1288,5 +1257,5 @@ for case in json_cases:
     GAPoolingResult = {}
 
 # Results are recorder as json file
-with open('GAPoolingAll_v4a_p1.json', 'w') as outfile:
+with open('GAPoolingAll_v4a_p4.json', 'w') as outfile:
     json.dump(results, outfile)

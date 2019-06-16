@@ -1175,13 +1175,12 @@ def GAPoolingHeuristic(case_id, failure_rates, service_rates, holding_costs, pen
 
 
 # file = "C:/Users/Fuat/Dropbox/Pooling_GA/fullRangeResultsFullFlexNew.json"
-file = "/home/vvglab/Projects/Python/pooling_ga2/fullRangeResultsFullFlexNew.json"
+file = "/home/atmis/Projects/Python/kmedian_final_version/fullRangeResultsFullFlexNew.json"
 json_case = [json.loads(line) for line in open(file, "r")]
 sorted_assignments = sorted(json_case, key=operator.itemgetter('caseID'))
-json_cases = sorted_assignments[65:98]
+json_cases = sorted_assignments[:]
 for case in json_cases:
     print (case["caseID"])
-
 
 # RUN of ALgorithm STARTS HERE ##
 # json_case
@@ -1191,12 +1190,12 @@ case_idx = 0
 
 # get best n individuals found by kmedian algorithm
 num_cases = len(json_case)-1
-n_best_individuals = get_n_best_individuals(num_cases, n=5)
+n_best_individuals = get_n_best_individuals(num_cases+1, n=5)
 
 
 for case in json_cases:
-    # if case["caseID"] not in ["Case: 0126", "Case: 0127", "Case: 0128"]:
-    #     continue
+    if case["caseID"] not in ["Case: 0128"]:
+         continue
     if case["caseID"] != "Case: 000x":
         failure_rates = case["failure_rates"]
         service_rates = case["service_rates"]
@@ -1241,7 +1240,7 @@ for case in json_cases:
     GAPoolingResult["simulationGAresults"] = case
     results.append(GAPoolingResult)
     case_idx += 1
-    with open('results_p3.csv', 'a') as csvfile:
+    with open('results_p4.csv', 'a') as csvfile:
         fieldnames = ['case_id', 'running_time', 'total_cost', 'holding_cost',
                       'penalty_cost', 'machine_cost', 'skill_cost', 'best_cluster',
                       'bestS', 'bestEBO', 'bestServerAssignment', 'GAP', 'GAPoolingPercentGAP']
@@ -1259,5 +1258,5 @@ for case in json_cases:
     GAPoolingResult = {}
 
 # Results are recorder as json file
-with open('GAPoolingAll_v4a_p3.json', 'w') as outfile:
+with open('GAPoolingAll_v4a_p4.json', 'w') as outfile:
     json.dump(results, outfile)
